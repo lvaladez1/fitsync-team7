@@ -1,0 +1,16 @@
+node_modules/
+.env
+.DS_Store
+.vscode/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS / misc
+Thumbs.db
+
+# Build / temp files
+dist/
+build/
