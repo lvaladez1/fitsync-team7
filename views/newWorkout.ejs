@@ -1,0 +1,25 @@
+<body>
+    <div>
+        <h1>Add Workout</h1>
+    </div>
+    
+    <form action="/workouts/new" method="POST">
+        <div> 
+        <p>Workout name:</p>
+        <input type="text" name="workout_name">
+        <p>Date:</p>
+        <input type="date" name="workout_date">
+        <p>Duration:</p>
+        <input type="number" name="duration_minutes" min="0" placeholder="Enter in minutes">
+        <p>Notes:</p>
+        <textarea name="notes" placeholder="Enter notes here."></textarea> 
+        </div>
+        <% if (message) { %> 
+            <div>
+                <p><%=message%></p>
+            </div>    
+        <% } %>
+        <br>
+        <button>Save</button>
+    </form>
+</body>
