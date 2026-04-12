@@ -1,0 +1,63 @@
+<%- include('partials/header') %>
+<%- include('partials/nav') %>
+
+<h1>Create Account</h1>
+
+<form action="/signup" method="POST" id="signupForm">
+    <div>
+        <label for="first_name">First Name</label>
+        <input type="text" id="first_name" name="first_name" required>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="last_name">Last Name</label>
+        <input type="text" id="last_name" name="last_name" required>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" required>
+    </div>
+
+    <br>
+
+    <div>
+        <label for="fitness_goal">Fitness Goal</label>
+        <input type="text" id="fitness_goal" name="fitness_goal">
+    </div>
+
+    <br>
+
+    <div>
+        <label for="preferred_workout_type">Preferred Workout Type</label>
+        <select id="preferred_workout_type" name="preferred_workout_type">
+            <option value="">Select One</option>
+            <option value="Strength">Strength</option>
+            <option value="Cardio">Cardio</option>
+            <option value="Flexibility">Flexibility</option>
+            <option value="Sports">Sports</option>
+        </select>
+    </div>
+
+    <br>
+
+    <button type="submit">Create Account</button>
+</form>
+
+<p>Your preferred workout type and fitness goal will be remembered in this browser.</p>
+<p>Already have an account? <a href="/login">Log in here</a></p>
+
+<script src="/js/auth.js"></script>
+
+<%- include('partials/footer') %>
