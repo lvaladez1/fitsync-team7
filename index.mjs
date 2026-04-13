@@ -2,7 +2,6 @@ import express from 'express';
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
 import session from 'express-session';
-import session from 'express-session';
 dotenv.config();
 
 const app = express();
@@ -10,11 +9,6 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
-app.use(session({
-    secret: 'secret-session-key',
-    resave: false,
-    saveUninitialized: false
-}));
 app.use(session({
     secret: 'secret-session-key',
     resave: false,
@@ -89,9 +83,6 @@ app.post('/login', async (req, res) => {
         if (rows.length > 0) {        
             req.session.user_id = rows[0].user_id;  // --Store user_id in session
             req.session.authenticated = true;     // --User Authenticated
-        if (rows.length > 0) {        
-            req.session.user_id = rows[0].user_id;  // --Store user_id in session
-            req.session.authenticated = true;     // --User Authenticated
             res.redirect('/dbTest');
         } else {
             res.status(401).send('Invalid email or password');
@@ -107,25 +98,15 @@ app.get('/logout', (req, res) => {
     req.session.destroy(() => {
         res.redirect('/login');
     });
-// --LOGOUT
-app.get('/logout', (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/login');
-    });
 });
 
-// --ADD WORKOUT 
-app.get('/workouts/new', isAuthenticated, (req, res) => {
 // --ADD WORKOUT 
 app.get('/workouts/new', isAuthenticated, (req, res) => {
     res.render('newWorkout', { 'message': '' });
 });
 
 app.post('/workouts/new', isAuthenticated, async (req, res) => {
-app.post('/workouts/new', isAuthenticated, async (req, res) => {
     try {
-        const user_id = req.session.user_id;
-
         const user_id = req.session.user_id;
 
         const {
@@ -134,13 +115,9 @@ app.post('/workouts/new', isAuthenticated, async (req, res) => {
             duration_minutes,
             notes,
             is_deleted
-            notes,
-            is_deleted
         } = req.body;
 
         let sql = `INSERT INTO workouts
-                (user_id, workout_name, workout_date, duration_minutes, notes, is_deleted)
-                VALUES (?, ?, ?, ?, ?, ?)`;
                 (user_id, workout_name, workout_date, duration_minutes, notes, is_deleted)
                 VALUES (?, ?, ?, ?, ?, ?)`;
         let params = [
@@ -149,7 +126,6 @@ app.post('/workouts/new', isAuthenticated, async (req, res) => {
             workout_date,
             duration_minutes,
             notes,
-            is_deleted
             is_deleted
         ];
         const [rows] = await pool.query(sql, params);
@@ -162,18 +138,12 @@ app.post('/workouts/new', isAuthenticated, async (req, res) => {
 });
 
 app.get('/workouts/history', isAuthenticated, async (req, res) => {
-app.get('/workouts/history', isAuthenticated, async (req, res) => {
     try {
-        const user_id = req.session.user_id;
-        const is_deleted = 0;
-
         const user_id = req.session.user_id;
         const is_deleted = 0;
 
         let sql = `SELECT *,
                 DATE_FORMAT(workout_date, '%Y-%m-%d') workout_date 
-                FROM workouts WHERE user_id = ? AND is_deleted = ?`;
-        const [rows] = await pool.query(sql, [user_id, is_deleted]);
                 FROM workouts WHERE user_id = ? AND is_deleted = ?`;
         const [rows] = await pool.query(sql, [user_id, is_deleted]);
 
@@ -185,7 +155,6 @@ app.get('/workouts/history', isAuthenticated, async (req, res) => {
 });
 
 // --EDIT WORKOUT
-app.get('/workouts/edit', isAuthenticated, async (req, res) => {
 app.get('/workouts/edit', isAuthenticated, async (req, res) => {
     try {
         const user_id = req.session.user_id;
@@ -209,7 +178,6 @@ app.get('/workouts/edit', isAuthenticated, async (req, res) => {
 
 app.post('/workouts/edit', async (req, res) => {
     try {
-        const user_id = req.session.user_id;
         const user_id = req.session.user_id;
         const {
             workout_name,
