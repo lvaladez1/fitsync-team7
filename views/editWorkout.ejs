@@ -1,0 +1,26 @@
+<body>
+    <div>
+        <h1>Edit Workout</h1>
+    </div>
+    <form action="/workouts/edit" method="POST">
+        <div> 
+            <input type="hidden" name="workout_id" value="<%=workoutInfo.workout_id%>">
+            <p>Workout name:</p>
+            <input type="text" name="workout_name" value="<%=workoutInfo.workout_name%>">
+            <p>Date:</p>
+            <input type="date" name="workout_date" value="<%=workoutInfo.workout_date%>">
+            <p>Duration:</p>
+            <input type="number" name="duration_minutes" min="0" value="<%=workoutInfo.duration_minutes%>">
+            <p>Notes:</p>
+            <textarea name="notes" placeholder="Enter notes here."><%=workoutInfo.notes%></textarea>
+            <input type="hidden" name="is_deleted" value="0"> 
+        </div>
+        <% if (message) { %> 
+            <div>
+                <p><%=message%></p>
+            </div>    
+        <% } %>
+        <br>
+        <button>Update</button>
+    </form>
+</body>

@@ -1,0 +1,19 @@
+<body>
+    <div>
+        <h1>Workout History</h1>
+    </div>
+    <form action="/workouts/history">
+        <% for (i=0; i < workoutList.length; i++) { %>
+        <div> 
+            <p>Workout: <%= workoutList[i].workout_name %></p>
+            <p>Date: <%= workoutList[i].workout_date %></p>
+            <p>Duration: <%= workoutList[i].duration_minutes %></p>
+            <p>Notes: <%= workoutList[i].notes %></p> 
+        </div>  
+        <a href="/workouts/edit?workout_id=<%=workoutList[i].workout_id%>">UPDATE</a>
+        <a href="/workouts/delete?workout_id=<%=workoutList[i].workout_id%>">DELETE</a>
+        <br>
+        <% } %>
+
+    </form>
+</body>
