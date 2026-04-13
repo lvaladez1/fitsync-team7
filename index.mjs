@@ -176,7 +176,7 @@ app.get('/workouts/edit', isAuthenticated, async (req, res) => {
     }
 });
 
-app.post('/workouts/edit', async (req, res) => {
+app.post('/workouts/edit', isAuthenticated, async (req, res) => {
     try {
         const user_id = req.session.user_id;
         const {
