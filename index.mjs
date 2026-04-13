@@ -21,7 +21,68 @@ const pool = mysql.createPool({
 
 // --Home
 app.get('/', (req, res) => {
-    res.render('index');
+    res.redirect('/login');
+});
+
+// --AUTH PAGES
+app.get('/login', (req, res) => {
+    res.render('login');
+});
+
+app.get('/signup', (req, res) => {
+    res.render('signup');
+});
+
+// --SIGNUP
+app.post('/signup', async (req, res) => {
+    try {
+
+        const {
+            first_name,
+            last_name,
+            email,
+            password,
+            fitness_goal,
+            preferred_workout_type
+        } = req.body;
+
+        await pool.query(
+            `INSERT INTO users 
+            (first_name, last_name, email, password, fitness_goal, preferred_workout_type)
+            VALUES (?, ?, ?, ?, ?, ?)`,
+            [first_name, last_name, email, password, fitness_goal, preferred_workout_type]
+        );
+
+        res.redirect('/login');
+    } catch (err) {
+        console.error('SIGNUP ERROR:', err);
+
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(400).send('Email already exists');
+        }
+        res.status(500).send('Error creating account');
+    }
+});
+
+// --LOGIN
+app.post('/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        const [rows] = await pool.query(
+            'SELECT * FROM users WHERE email = ? AND password = ?',
+            [email, password]
+        );
+
+        if (rows.length > 0) {
+            res.redirect('/dbTest');
+        } else {
+            res.status(401).send('Invalid email or password');
+        }
+    } catch (err) {
+        console.error('LOGIN ERROR:', err);
+        res.status(500).send('Error logging in');
+    }
 });
 
 
@@ -181,7 +242,6 @@ app.post('/workouts/edit', async (req, res) => {
 // --DB TEST
 app.get('/dbTest', async (req, res) => {
     try {
-        // const [rows] = await pool.query('SELECT CURDATE() AS today');
         const [rows] = await pool.query('SELECT * FROM users');
         res.send(rows);
     } catch (err) {
@@ -191,7 +251,6 @@ app.get('/dbTest', async (req, res) => {
 });
 
 // --START SERVER
-
 app.listen(3000, () => {
     console.log('Express server running on port 3000');
 });
