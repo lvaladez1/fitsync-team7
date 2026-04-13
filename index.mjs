@@ -1,6 +1,7 @@
 import express from 'express';
 import mysql from 'mysql2/promise';
 import dotenv from 'dotenv';
+import session from 'express-session';
 dotenv.config();
 
 const app = express();
@@ -8,6 +9,11 @@ const app = express();
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
+app.use(session({
+    secret: 'secret-session-key',
+    resave: false,
+    saveUninitialized: false
+}));
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -74,7 +80,9 @@ app.post('/login', async (req, res) => {
             [email, password]
         );
 
-        if (rows.length > 0) {
+        if (rows.length > 0) {        
+            req.session.user_id = rows[0].user_id;  // --Store user_id in session
+            req.session.authenticated = true;     // --User Authenticated
             res.redirect('/dbTest');
         } else {
             res.status(401).send('Invalid email or password');
@@ -85,65 +93,40 @@ app.post('/login', async (req, res) => {
     }
 });
 
-
-/* // --ADD WORKOUT
-// GET route when express-session is implemented
-
-app.get('/workouts/new', isAuthenticated, (req, res) => {
-    res.render('newWorkout');
-
+// --LOGOUT
+app.get('/logout', (req, res) => {
+    req.session.destroy(() => {
+        res.redirect('/login');
     });
-
-// POST route when express-session is implemented
-app.post('/workouts/new', isAuthenticated, (req, res) => {
-    const user_id = req.session.user_id;
-    const {
-        workout_name, 
-        workout_date, 
-        duration_minutes, 
-        notes
-    } = req.body;
-
-    let sql = `INSERT INTO workouts
-                (user_id, workout_name, workout_date, duration_minutes, notes)
-                VALUES (?, ?, ?, ?, ?)`;
-    let params = [
-        user_id,
-        workout_name,
-        workout_date, 
-        duration_minutes, 
-        notes,
-    ]; 
-    const [rows] = await pool.query(sql, params);
-
-    res.render('newWorkout', {'message': 'Workout added!'});
 });
-*/
 
-// --ADD WORKOUT
-app.get('/workouts/new', (req, res) => {
+// --ADD WORKOUT 
+app.get('/workouts/new', isAuthenticated, (req, res) => {
     res.render('newWorkout', { 'message': '' });
 });
 
-app.post('/workouts/new', async (req, res) => {
+app.post('/workouts/new', isAuthenticated, async (req, res) => {
     try {
-        const user_id = 1; // simulate express-session user_id
+        const user_id = req.session.user_id;
+
         const {
             workout_name,
             workout_date,
             duration_minutes,
-            notes
+            notes,
+            is_deleted
         } = req.body;
 
         let sql = `INSERT INTO workouts
-                (user_id, workout_name, workout_date, duration_minutes, notes)
-                VALUES (?, ?, ?, ?, ?)`;
+                (user_id, workout_name, workout_date, duration_minutes, notes, is_deleted)
+                VALUES (?, ?, ?, ?, ?, ?)`;
         let params = [
             user_id,
             workout_name,
             workout_date,
             duration_minutes,
             notes,
+            is_deleted
         ];
         const [rows] = await pool.query(sql, params);
 
@@ -154,13 +137,15 @@ app.post('/workouts/new', async (req, res) => {
     }
 });
 
-app.get('/workouts/history', async (req, res) => { // ('/workouts/history', isAuthorized, async(req, res) )
+app.get('/workouts/history', isAuthenticated, async (req, res) => {
     try {
-        const user_id = 1; // const user_id = req.session.user_id;
+        const user_id = req.session.user_id;
+        const is_deleted = 0;
+
         let sql = `SELECT *,
                 DATE_FORMAT(workout_date, '%Y-%m-%d') workout_date 
-                FROM workouts WHERE user_id = ?`;
-        const [rows] = await pool.query(sql, user_id);
+                FROM workouts WHERE user_id = ? AND is_deleted = ?`;
+        const [rows] = await pool.query(sql, [user_id, is_deleted]);
 
         res.render('workoutsList', { 'workoutList': rows });
     } catch (err) {
@@ -170,12 +155,10 @@ app.get('/workouts/history', async (req, res) => { // ('/workouts/history', isAu
 });
 
 // --EDIT WORKOUT
-app.get('/workouts/edit', async (req, res) => {
+app.get('/workouts/edit', isAuthenticated, async (req, res) => {
     try {
-        const {
-            user_id,
-            workout_id
-        } = req.query;
+        const user_id = req.session.user_id;
+        const workout_id = req.query.workout_id;
 
         let sql = `SELECT *, 
                 DATE_FORMAT(workout_date, '%Y-%m-%d') workout_date 
@@ -195,13 +178,13 @@ app.get('/workouts/edit', async (req, res) => {
 
 app.post('/workouts/edit', async (req, res) => {
     try {
+        const user_id = req.session.user_id;
         const {
             workout_name,
             workout_date,
             duration_minutes,
             notes,
             is_deleted,
-            user_id,
             workout_id
         } = req.body;
 
@@ -239,6 +222,17 @@ app.post('/workouts/edit', async (req, res) => {
     }
 });
 
+// --DELETE WORKOUT
+app.get('/workouts/delete', isAuthenticated, async (req, res) => {
+    const user_id = req.session.user_id;
+    const is_deleted = 1;
+    const sql = `UPDATE workouts 
+                 SET is_deleted = ? 
+                 WHERE user_id = ? AND workout_id = ?`;
+    const [rows] = await pool.query(sql, [is_deleted, user_id, req.query.workout_id]);
+    res.redirect('/workouts/history');
+});
+
 // --DB TEST
 app.get('/dbTest', async (req, res) => {
     try {
@@ -258,7 +252,7 @@ app.listen(3000, () => {
 // --FUNCTIONS
 function isAuthenticated(req, res, next) {
     if (!req.session.authenticated) {
-        res.render('/login');
+        res.redirect('/login');
     } else {
         next();
     }

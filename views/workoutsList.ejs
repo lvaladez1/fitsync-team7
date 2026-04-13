@@ -10,8 +10,8 @@
             <p>Duration: <%= workoutList[i].duration_minutes %></p>
             <p>Notes: <%= workoutList[i].notes %></p> 
         </div>  
-        <a href="/workouts/edit?user_id=<%=workoutList[i].user_id%>&workout_id=<%=workoutList[i].workout_id%>">UPDATE</a>
-        <a href="/workouts/delete?user_id=<%=workoutList[i].user_id%>&workout_id=<%=workoutList[i].workout_id%>">DELETE</a>
+        <a href="/workouts/edit?workout_id=<%=workoutList[i].workout_id%>">UPDATE</a>
+        <a href="/workouts/delete?workout_id=<%=workoutList[i].workout_id%>">DELETE</a>
         <br>
         <% } %>
 
