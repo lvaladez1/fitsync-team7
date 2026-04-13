@@ -39,6 +39,11 @@ app.get('/signup', (req, res) => {
     res.render('signup');
 });
 
+// --TEMP HOME PAGE
+app.get('/home', isAuthenticated, (req, res) => {
+    res.render('home');
+});
+
 // --SIGNUP
 app.post('/signup', async (req, res) => {
     try {
@@ -83,7 +88,7 @@ app.post('/login', async (req, res) => {
         if (rows.length > 0) {        
             req.session.user_id = rows[0].user_id;  // --Store user_id in session
             req.session.authenticated = true;     // --User Authenticated
-            res.redirect('/dbTest');
+            res.redirect('/home');
         } else {
             res.status(401).send('Invalid email or password');
         }
