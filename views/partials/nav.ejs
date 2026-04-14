@@ -1,8 +1,25 @@
-<nav>
-    <a href="/">Home</a> |
-    <a href="/login">Login</a> |
-    <a href="/signup">Sign Up</a> |
-    <a href="/dbTest">DB Test</a>
-</nav>
+<% const authenticated = typeof isAuthenticated !== 'undefined' && isAuthenticated; %>
 
-<hr>
+<header class="site-header">
+    <a class="site-brand" href="<%= authenticated ? '/home' : '/login' %>">
+        <span class="site-brand__mark">fs</span>
+        <span>
+            <span class="site-brand__eyebrow">team 7 project</span>
+            <span class="site-brand__name">FitSync</span>
+        </span>
+    </a>
+
+    <nav class="site-nav" aria-label="Primary">
+        <% if (authenticated) { %>
+            <a class="site-nav__link" href="/home">dashboard</a>
+            <a class="site-nav__link" href="/workouts/new">add workout</a>
+            <a class="site-nav__link" href="/workouts/history">history</a>
+            <a class="site-nav__link site-nav__link--accent" href="/logout">logout</a>
+        <% } else { %>
+            <a class="site-nav__link" href="/login">login</a>
+            <a class="site-nav__link site-nav__link--accent" href="/signup">sign up</a>
+        <% } %>
+    </nav>
+</header>
+
+<main class="app-main">

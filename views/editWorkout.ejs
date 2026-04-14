@@ -1,26 +1,72 @@
-<body>
-    <div>
-        <h1>Edit Workout</h1>
-    </div>
-    <form action="/workouts/edit" method="POST">
-        <div> 
-            <input type="hidden" name="workout_id" value="<%=workoutInfo.workout_id%>">
-            <p>Workout name:</p>
-            <input type="text" name="workout_name" value="<%=workoutInfo.workout_name%>">
-            <p>Date:</p>
-            <input type="date" name="workout_date" value="<%=workoutInfo.workout_date%>">
-            <p>Duration:</p>
-            <input type="number" name="duration_minutes" min="0" value="<%=workoutInfo.duration_minutes%>">
-            <p>Notes:</p>
-            <textarea name="notes" placeholder="Enter notes here."><%=workoutInfo.notes%></textarea>
-            <input type="hidden" name="is_deleted" value="0"> 
+<%- include('partials/header', { pageTitle: 'edit workout', pageClass: 'page-workouts' }) %>
+<%- include('partials/nav') %>
+
+<section class="hero-panel">
+    <div class="hero-panel__grid">
+        <div>
+            <span class="eyebrow">update session</span>
+            <h1 class="page-title">adjust the workout log so your history stays accurate.</h1>
+            <p class="page-copy">
+                Fix the details, add context, or clean up the record.
+            </p>
         </div>
-        <% if (message) { %> 
-            <div>
-                <p><%=message%></p>
-            </div>    
-        <% } %>
-        <br>
-        <button>Update</button>
-    </form>
-</body>
+
+        <aside class="hero-panel__aside">
+            <div class="hero-stack">
+                <div>
+                    <span class="hero-kicker">editing fields</span>
+                    <div class="hero-stat">4 core</div>
+                </div>
+                <p class="hero-note">
+                    Update the name, date, duration, and notes in one pass.
+                </p>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<section class="content-grid mt-4">
+    <section class="content-panel">
+        <h2 class="panel-title">edit workout</h2>
+        <p class="panel-copy">Make your changes below and save the updated version to your history.</p>
+
+        <form action="/workouts/edit" method="POST" class="app-form mt-4">
+            <input type="hidden" name="workout_id" value="<%= workoutInfo.workout_id %>">
+
+            <div class="field-group">
+                <label for="workout_name">Workout Name</label>
+                <input type="text" id="workout_name" name="workout_name" value="<%= workoutInfo.workout_name %>" required>
+            </div>
+
+            <div class="form-grid form-grid--two">
+                <div class="field-group">
+                    <label for="workout_date">Date</label>
+                    <input type="date" id="workout_date" name="workout_date" value="<%= workoutInfo.workout_date %>" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="duration_minutes">Duration</label>
+                    <input type="number" id="duration_minutes" name="duration_minutes" min="0" value="<%= workoutInfo.duration_minutes %>" required>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" placeholder="Enter notes here."><%= workoutInfo.notes %></textarea>
+            </div>
+
+            <input type="hidden" name="is_deleted" value="0">
+
+            <% if (message) { %>
+                <div class="status-message"><%= message %></div>
+            <% } %>
+
+            <div class="button-row">
+                <button class="app-button" type="submit">update workout</button>
+                <a class="app-button-ghost" href="/workouts/history">back to history</a>
+            </div>
+        </form>
+    </section>
+</section>
+
+<%- include('partials/footer') %>

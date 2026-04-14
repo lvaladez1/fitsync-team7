@@ -14,6 +14,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
+app.use((req, res, next) => {
+    res.locals.isAuthenticated = Boolean(req.session?.authenticated);
+    next();
+});
 
 const pool = mysql.createPool({
     host: process.env.DB_HOST,
@@ -24,6 +28,7 @@ const pool = mysql.createPool({
     connectionLimit: 10,
     waitForConnections: true
 });
+let usersTableColumns;
 
 // --Home
 app.get('/', (req, res) => {
@@ -36,32 +41,115 @@ app.get('/login', (req, res) => {
 });
 
 app.get('/signup', (req, res) => {
-    res.render('signup');
+    res.render('signup', {
+        errorMessage: '',
+        formData: getSignupFormData()
+    });
 });
 
-// --TEMP HOME PAGE
-app.get('/home', isAuthenticated, (req, res) => {
-    res.render('home');
+// --HOME DASHBOARD
+app.get('/home', isAuthenticated, async (req, res) => {
+    try {
+        const user_id = req.session.user_id;
+        const userColumns = await getUsersTableColumns();
+        const userSelectColumns = ['first_name'];
+
+        if (userColumns.has('fitness_goal')) {
+            userSelectColumns.push('fitness_goal');
+        } else {
+            userSelectColumns.push('NULL AS fitness_goal');
+        }
+
+        if (userColumns.has('preferred_workout_type')) {
+            userSelectColumns.push('preferred_workout_type');
+        } else {
+            userSelectColumns.push('NULL AS preferred_workout_type');
+        }
+
+        const [userRows] = await pool.query(
+            `SELECT ${userSelectColumns.join(', ')}
+             FROM users
+             WHERE user_id = ?`,
+            [user_id]
+        );
+
+        const [summaryRows] = await pool.query(
+            `SELECT COUNT(*) AS workout_count,
+                    COALESCE(SUM(duration_minutes), 0) AS total_minutes,
+                    DATE_FORMAT(MAX(workout_date), '%b %e, %Y') AS latest_workout_date
+             FROM workouts
+             WHERE user_id = ? AND is_deleted = 0`,
+            [user_id]
+        );
+
+        const [recentRows] = await pool.query(
+            `SELECT workout_id,
+                    workout_name,
+                    DATE_FORMAT(workout_date, '%b %e, %Y') AS workout_date_label,
+                    duration_minutes,
+                    notes
+             FROM workouts
+             WHERE user_id = ? AND is_deleted = 0
+             ORDER BY workout_date DESC, workout_id DESC
+             LIMIT 4`,
+            [user_id]
+        );
+
+        const dashboard = createDashboardViewModel(
+            userRows[0],
+            summaryRows[0],
+            recentRows
+        );
+
+        res.render('home', { dashboard });
+    } catch (err) {
+        console.error('HOME DASHBOARD ERROR:', err);
+        res.status(500).send('Error loading dashboard');
+    }
 });
 
 // --SIGNUP
 app.post('/signup', async (req, res) => {
-    try {
+    const formData = getSignupFormData(req.body);
 
-        const {
-            first_name,
-            last_name,
-            email,
-            password,
-            fitness_goal,
-            preferred_workout_type
-        } = req.body;
+    try {
+        if (!formData.first_name || !formData.last_name || !formData.email || !formData.password) {
+            return res.status(400).render('signup', {
+                errorMessage: 'Please fill out all required fields.',
+                formData
+            });
+        }
+
+        const userColumns = await getUsersTableColumns();
+        const requiredColumns = ['first_name', 'last_name', 'email', 'password'];
+        const missingRequiredColumns = requiredColumns.filter((column) => !userColumns.has(column));
+
+        if (missingRequiredColumns.length > 0) {
+            throw new Error('users table is missing required signup columns??');
+        }
+
+        const insertColumns = [...requiredColumns];
+        const insertValues = [
+            formData.first_name,
+            formData.last_name,
+            formData.email,
+            formData.password
+        ];
+
+        if (userColumns.has('fitness_goal')) {
+            insertColumns.push('fitness_goal');
+            insertValues.push(formData.fitness_goal || null);
+        }
+
+        if (userColumns.has('preferred_workout_type')) {
+            insertColumns.push('preferred_workout_type');
+            insertValues.push(formData.preferred_workout_type || null);
+        }
 
         await pool.query(
-            `INSERT INTO users 
-            (first_name, last_name, email, password, fitness_goal, preferred_workout_type)
-            VALUES (?, ?, ?, ?, ?, ?)`,
-            [first_name, last_name, email, password, fitness_goal, preferred_workout_type]
+            `INSERT INTO users (${insertColumns.join(', ')})
+            VALUES (${insertColumns.map(() => '?').join(', ')})`,
+            insertValues
         );
 
         res.redirect('/login');
@@ -69,9 +157,16 @@ app.post('/signup', async (req, res) => {
         console.error('SIGNUP ERROR:', err);
 
         if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(400).send('Email already exists');
+            return res.status(400).render('signup', {
+                errorMessage: 'That email already exists. Try logging in instead.',
+                formData
+            });
         }
-        res.status(500).send('Error creating account');
+
+        res.status(500).render('signup', {
+            errorMessage: 'Database error while creating account. Check the server log for the exact failure.',
+            formData
+        });
     }
 });
 
@@ -86,8 +181,8 @@ app.post('/login', async (req, res) => {
         );
 
         if (rows.length > 0) {        
-            req.session.user_id = rows[0].user_id;  // --Store user_id in session
-            req.session.authenticated = true;     // --User Authenticated
+            req.session.user_id = rows[0].user_id;
+            req.session.authenticated = true;
             res.redirect('/home');
         } else {
             res.status(401).send('Invalid email or password');
@@ -250,8 +345,10 @@ app.get('/dbTest', async (req, res) => {
 });
 
 // --START SERVER
-app.listen(3000, () => {
-    console.log('Express server running on port 3000');
+const port = process.env.PORT || 3000;
+
+app.listen(port, () => {
+    console.log(`Express server running on port ${port}`);
 });
 
 // --FUNCTIONS
@@ -261,4 +358,61 @@ function isAuthenticated(req, res, next) {
     } else {
         next();
     }
+}
+
+function createDashboardViewModel(userRow, summaryRow, recentRows) {
+    const preferredWorkoutType = userRow?.preferred_workout_type || 'No preference saved yet';
+
+    return {
+        firstName: userRow?.first_name || 'Athlete',
+        fitnessGoal: userRow?.fitness_goal || 'Set a goal in your profile to keep the dashboard focused.',
+        preferredWorkoutType,
+        workoutCount: Number(summaryRow?.workout_count || 0),
+        totalMinutes: Number(summaryRow?.total_minutes || 0),
+        latestWorkoutDate: summaryRow?.latest_workout_date || 'No workouts logged yet',
+        recentWorkouts: recentRows.map((workout) => ({
+            ...workout,
+            notesPreview: workout.notes
+                ? workout.notes.slice(0, 120)
+                : 'No notes added yet.'
+        })),
+        locationPrompt: getLocationPrompt(preferredWorkoutType)
+    };
+}
+
+// responsive / contextual per user..
+function getLocationPrompt(preferredWorkoutType) {
+    switch (preferredWorkoutType) {
+        case 'Strength':
+            return 'A quick walk plus some stretching can set up a stronger lift later.';
+        case 'Cardio':
+            return 'If the weather feels right, this is a good time for an outdoor run.';
+        case 'Flexibility':
+            return 'A short stretch can make recovery more comfortable.';
+        case 'Sports':
+            return 'Go scout a nearby field, court, or park for ideas.';
+        default:
+            return 'Check in here so you can remember your spot for next time!';
+    }
+}
+
+function getSignupFormData(input = {}) {
+    return {
+        first_name: String(input.first_name || '').trim(),
+        last_name: String(input.last_name || '').trim(),
+        email: String(input.email || '').trim(),
+        password: String(input.password || ''),
+        fitness_goal: String(input.fitness_goal || '').trim(),
+        preferred_workout_type: String(input.preferred_workout_type || '').trim()
+    };
+}
+
+async function getUsersTableColumns() {
+    if (usersTableColumns) {
+        return usersTableColumns;
+    }
+
+    const [rows] = await pool.query('SHOW COLUMNS FROM users');
+    usersTableColumns = new Set(rows.map((row) => row.Field));
+    return usersTableColumns;
 }

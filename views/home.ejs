@@ -1,23 +1,158 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { pageTitle: 'dashboard', pageClass: 'page-dashboard' }) %>
 <%- include('partials/nav') %>
 
-<h1>Welcome to FitSync!</h1>
+<section class="hero-panel">
+    <div class="hero-panel__grid">
+        <div>
+            <span class="eyebrow">dashboard</span>
+            <h1 class="page-title">good to see you, <%= dashboard.firstName %>.</h1>
+            <p class="page-copy">
+                <strong>Goal:</strong> <%= dashboard.fitnessGoal %>
+                <br>
+                <strong>Preferred workout type:</strong> <%= dashboard.preferredWorkoutType %>
+            </p>
 
-<p>You are now logged in.</p>
+            <div class="button-row mt-4">
+                <a class="app-button" href="/workouts/new">add workout</a>
+                <a class="app-button-ghost" href="/workouts/history">view history</a>
+            </div>
+        </div>
 
-<h2>Quick Actions</h2>
-<ul>
-    <li><a href="/workouts/new">Add workout</a></li>
-    <li><a href="/workouts/history">View Workouts</a></li>
-    <li><a href="/logout">Logout</a></li>
-</ul>
+        <aside class="hero-panel__aside">
+            <div class="hero-stack">
+                <div>
+                    <span class="hero-kicker">latest checkpoint</span>
+                    <div class="hero-stat"><%= dashboard.latestWorkoutDate %></div>
+                </div>
+                <p class="hero-note">
+                    Keep logging consistently so your dashboard stays useful
+                </p>
+            </div>
+        </aside>
+    </div>
+</section>
 
-<h2>Exercises (Coming Soon)</h2>
-<ul>
-    <li><a href="/exercises/new">Add Exercise (coming soon..)</a></li>
-    <li><a href="/exercises/list">View Exercises (coming soon..)</a></li>
-</ul>
+<section class="content-grid content-grid--wide">
+    <section class="content-panel dashboard-span-two">
+        <div class="section-heading">
+            <div>
+                <h2 class="panel-title">quick summary</h2>
+                <p class="panel-copy">A quick summary on how much training you have logged so far.</p>
+            </div>
+        </div>
 
-<p>This is a temporary home page.</p>
+        <div class="dashboard-stat-grid">
+            <article class="dashboard-stat">
+                <span class="dashboard-stat__label">total workouts</span>
+                <strong class="dashboard-stat__value"><%= dashboard.workoutCount %></strong>
+                <p class="dashboard-stat__note">Saved sessions currently in your active history</p>
+            </article>
+
+            <article class="dashboard-stat">
+                <span class="dashboard-stat__label">total minutes</span>
+                <strong class="dashboard-stat__value"><%= dashboard.totalMinutes %></strong>
+                <p class="dashboard-stat__note">Minutes tracked across all workouts</p>
+            </article>
+
+            <article class="dashboard-stat">
+                <span class="dashboard-stat__label">current focus</span>
+                <strong class="dashboard-stat__value dashboard-stat__value--text"><%= dashboard.preferredWorkoutType %></strong>
+                <p class="dashboard-stat__note">current focus copy here</p>
+            </article>
+        </div>
+    </section>
+
+    <section class="content-panel">
+        <div class="section-heading">
+            <div>
+                <h2 class="panel-title">recent workouts</h2>
+                <p class="panel-copy">Your latest sessions.</p>
+            </div>
+
+            <a class="app-button-ghost" href="/workouts/history">full history</a>
+        </div>
+
+        <% if (dashboard.recentWorkouts.length === 0) { %>
+            <div class="empty-state mt-4">
+                <h3 class="panel-title mb-2">start your log</h3>
+                <p class="panel-copy">Add your first workout and the dashboard will start reflecting progress.</p>
+            </div>
+        <% } else { %>
+            <div class="dashboard-list mt-4">
+                <% for (let i = 0; i < dashboard.recentWorkouts.length; i++) { %>
+                    <article class="dashboard-list__item">
+                        <div class="dashboard-list__topline">
+                            <strong><%= dashboard.recentWorkouts[i].workout_name %></strong>
+                            <span><%= dashboard.recentWorkouts[i].workout_date_label %></span>
+                        </div>
+                        <p class="dashboard-list__meta"><%= dashboard.recentWorkouts[i].duration_minutes %> min</p>
+                        <p class="dashboard-list__note"><%= dashboard.recentWorkouts[i].notesPreview %></p>
+                        <a class="dashboard-list__link" href="/workouts/edit?workout_id=<%= dashboard.recentWorkouts[i].workout_id %>">edit session</a>
+                    </article>
+                <% } %>
+            </div>
+        <% } %>
+    </section>
+
+    <section class="content-panel location-panel" id="locationCard" data-workout-type="<%= dashboard.preferredWorkoutType %>">
+        <div class="section-heading">
+            <div>
+                <h2 class="panel-title">outdoor check-in</h2>
+                <p class="panel-copy">Use your current location so you can return later.</p>
+            </div>
+
+            <button class="app-button-secondary" type="button" id="locationButton">use my location</button>
+        </div>
+
+        <div class="location-status mt-4" id="locationStatus" data-state="idle" data-default-message="<%= dashboard.locationPrompt %>" aria-live="polite">
+            <p class="location-status__message" id="locationMessage"><%= dashboard.locationPrompt %></p>
+
+            <dl class="location-data">
+                <div>
+                    <dt>status</dt>
+                    <dd id="locationStateLabel">idle</dd>
+                </div>
+                // update with actually lat long location resolution??
+                <div>
+                    <dt>latitude...</dt>
+                    <dd id="locationLatitude">--</dd>
+                </div>
+                <div>
+                    <dt>longitude...</dt>
+                    <dd id="locationLongitude">--</dd>
+                </div>
+                <div>
+                    <dt>updated</dt>
+                    <dd id="locationUpdated">--</dd>
+                </div>
+            </dl>
+        </div>
+    </section>
+
+    <section class="content-panel dashboard-span-two">
+        <div class="section-heading">
+            <div>
+                <h2 class="panel-title">panel title</h2>
+                <p class="panel-copy">panel copy here</p>
+            </div>
+        </div>
+
+        <div class="dashboard-callouts">
+            <article class="dashboard-callout">
+                <span class="dashboard-callout__tag">panel tag</span>
+                <h3>panel header</h3>
+                <p>panel copy</p>
+            </article>
+
+            <article class="dashboard-callout">
+                <span class="dashboard-callout__tag">weather (??)</span>
+                <h3>weather header here (??)</h3>
+                <p>weather copy/ component here</p>
+            </article>
+        </div>
+    </section>
+</section>
+
+<script src="/js/dashboard.js"></script>
 
 <%- include('partials/footer') %>
