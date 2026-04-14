@@ -1,26 +1,70 @@
-<body>
-    <div>
-        <h1>Add Workout</h1>
-    </div>
-    
-    <form action="/workouts/new" method="POST">
-        <div> 
-        <p>Workout name:</p>
-        <input type="text" name="workout_name">
-        <p>Date:</p>
-        <input type="date" name="workout_date">
-        <p>Duration:</p>
-        <input type="number" name="duration_minutes" min="0" placeholder="Enter in minutes">
-        <p>Notes:</p>
-        <textarea name="notes" placeholder="Enter notes here."></textarea> 
-        <input type="hidden" name="is_deleted" value="0">
+<%- include('partials/header', { pageTitle: 'add workout', pageClass: 'page-workouts' }) %>
+<%- include('partials/nav') %>
+
+<section class="hero-panel">
+    <div class="hero-panel__grid">
+        <div>
+            <span class="eyebrow">new session</span>
+            <h1 class="page-title">add a workout</h1>
+            <p class="page-copy">
+                Keep each entry simple with the basics: what you did, when you did it, and how it felt.
+            </p>
         </div>
-        <% if (message) { %> 
-            <div>
-                <p><%=message%></p>
-            </div>    
-        <% } %>
-        <br>
-        <button>Save</button>
-    </form>
-</body>
+
+        <aside class="hero-panel__aside">
+            <div class="hero-stack">
+                <div>
+                    <span class="hero-kicker">quick tip</span>
+                    <div class="hero-stat">30 sec</div>
+                </div>
+                <p class="hero-note">
+                    Short notes now make your history more useful later when you want to spot patterns in your training.
+                </p>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<section class="content-grid mt-4">
+    <section class="content-panel">
+        <h2 class="panel-title">workout details</h2>
+        <p class="panel-copy">Fill out the session info below and save it directly to your workout history.</p>
+
+        <form action="/workouts/new" method="POST" class="app-form mt-4">
+            <div class="field-group">
+                <label for="workout_name">Workout Name</label>
+                <input type="text" id="workout_name" name="workout_name" required>
+            </div>
+
+            <div class="form-grid form-grid--two">
+                <div class="field-group">
+                    <label for="workout_date">Date</label>
+                    <input type="date" id="workout_date" name="workout_date" required>
+                </div>
+
+                <div class="field-group">
+                    <label for="duration_minutes">Duration</label>
+                    <input type="number" id="duration_minutes" name="duration_minutes" min="0" placeholder="Enter minutes" required>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" placeholder="How did the workout go? any wins or adjustments?"></textarea>
+            </div>
+
+            <input type="hidden" name="is_deleted" value="0">
+
+            <% if (message) { %>
+                <div class="status-message"><%= message %></div>
+            <% } %>
+
+            <div class="button-row">
+                <button class="app-button" type="submit">save workout</button>
+                <a class="app-button-ghost" href="/workouts/history">view history</a>
+            </div>
+        </form>
+    </section>
+</section>
+
+<%- include('partials/footer') %>

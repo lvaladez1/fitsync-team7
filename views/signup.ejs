@@ -1,62 +1,110 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { pageTitle: 'sign up', pageClass: 'page-auth' }) %>
 <%- include('partials/nav') %>
+<%
+    const signupErrorMessage = typeof errorMessage !== 'undefined' ? errorMessage : '';
+    const signupFormData = typeof formData !== 'undefined' ? formData : {};
+%>
 
-<h1>Create Account</h1>
+<section class="hero-panel">
+    <div class="hero-panel__grid">
+        <div>
+            <span class="eyebrow">new account</span>
+            <h1 class="page-title">tagline here</h1>
+            <p class="page-copy">
+                Setup your FitSync profile, save your preferences, and start building a workout immediately.
+            </p>
+        </div>
 
-<form action="/signup" method="POST" id="signupForm">
-    <div>
-        <label for="first_name">First Name</label>
-        <input type="text" id="first_name" name="first_name" required>
+        <aside class="hero-panel__aside">
+            <div class="hero-stack">
+                <div>
+                    <span class="hero-kicker">saved locally</span>
+                    <div class="hero-stat">2 prefs</div>
+                </div>
+                <p class="hero-note">
+                    Your fitness goal and preferred workout type are remembered in this browser so the setup stays quick.
+                </p>
+            </div>
+        </aside>
     </div>
+</section>
 
-    <br>
+<section class="auth-grid">
+    <article class="content-panel">
+        <h2 class="panel-title">panel title</h2>
+        <p class="panel-copy">panel copy here</p>
 
-    <div>
-        <label for="last_name">Last Name</label>
-        <input type="text" id="last_name" name="last_name" required>
-    </div>
+        <ul class="feature-list">
+            <li>
+                <strong>set your goal</strong>
+                <span>Keep a simple fitness target attached to your profile for quick dashboard context.</span>
+            </li>
+            <li>
+                <strong>pick your workout style</strong>
+                <span>Choose the training type you lean toward most so the app can tailor quick prompts.</span>
+            </li>
+            <li>
+                <strong>start logging fast</strong>
+                <span>Once you create your profile, you can jump right into adding workouts.</span>
+            </li>
+        </ul>
+    </article>
 
-    <br>
+    <section class="content-panel">
+        <h2 class="panel-title">create account</h2>
+        <p class="panel-copy">Complete the form below and FitSync will save the basics for your first session.</p>
 
-    <div>
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" required>
-    </div>
+        <form action="/signup" method="POST" id="signupForm" class="app-form mt-4">
+            <% if (signupErrorMessage) { %>
+                <div class="status-message status-message--error"><%= signupErrorMessage %></div>
+            <% } %>
 
-    <br>
+            <div class="form-grid form-grid--two">
+                <div class="field-group">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name" value="<%= signupFormData.first_name || '' %>" required>
+                </div>
 
-    <div>
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" required>
-    </div>
+                <div class="field-group">
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" value="<%= signupFormData.last_name || '' %>" required>
+                </div>
+            </div>
 
-    <br>
+            <div class="field-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="<%= signupFormData.email || '' %>" required>
+            </div>
 
-    <div>
-        <label for="fitness_goal">Fitness Goal</label>
-        <input type="text" id="fitness_goal" name="fitness_goal">
-    </div>
+            <div class="field-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
 
-    <br>
+            <div class="field-group">
+                <label for="fitness_goal">Fitness Goal</label>
+                <input type="text" id="fitness_goal" name="fitness_goal" value="<%= signupFormData.fitness_goal || '' %>" placeholder="Build consistency, gain strength, train for cardio...">
+            </div>
 
-    <div>
-        <label for="preferred_workout_type">Preferred Workout Type</label>
-        <select id="preferred_workout_type" name="preferred_workout_type">
-            <option value="">Select One</option>
-            <option value="Strength">Strength</option>
-            <option value="Cardio">Cardio</option>
-            <option value="Flexibility">Flexibility</option>
-            <option value="Sports">Sports</option>
-        </select>
-    </div>
+            <div class="field-group">
+                <label for="preferred_workout_type">Preferred Workout Type</label>
+                <select id="preferred_workout_type" name="preferred_workout_type">
+                    <option value="">Select one</option>
+                    <option value="Strength" <%= signupFormData.preferred_workout_type === 'Strength' ? 'selected' : '' %>>Strength</option>
+                    <option value="Cardio" <%= signupFormData.preferred_workout_type === 'Cardio' ? 'selected' : '' %>>Cardio</option>
+                    <option value="Flexibility" <%= signupFormData.preferred_workout_type === 'Flexibility' ? 'selected' : '' %>>Flexibility</option>
+                    <option value="Sports" <%= signupFormData.preferred_workout_type === 'Sports' ? 'selected' : '' %>>Sports</option>
+                </select>
+                <p class="field-hint">Your preferred workout type and fitness goal will be remembered in this browser.</p>
+            </div>
 
-    <br>
-
-    <button type="submit">Create Account</button>
-</form>
-
-<p>Your preferred workout type and fitness goal will be remembered in this browser.</p>
-<p>Already have an account? <a href="/login">Log in here</a></p>
+            <div class="button-row">
+                <button class="app-button" type="submit">create account</button>
+                <a class="app-button-ghost" href="/login">back to login</a>
+            </div>
+        </form>
+    </section>
+</section>
 
 <script src="/js/auth.js"></script>
 

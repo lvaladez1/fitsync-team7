@@ -1,19 +1,78 @@
-<body>
-    <div>
-        <h1>Workout History</h1>
-    </div>
-    <form action="/workouts/history">
-        <% for (i=0; i < workoutList.length; i++) { %>
-        <div> 
-            <p>Workout: <%= workoutList[i].workout_name %></p>
-            <p>Date: <%= workoutList[i].workout_date %></p>
-            <p>Duration: <%= workoutList[i].duration_minutes %></p>
-            <p>Notes: <%= workoutList[i].notes %></p> 
-        </div>  
-        <a href="/workouts/edit?workout_id=<%=workoutList[i].workout_id%>">UPDATE</a>
-        <a href="/workouts/delete?workout_id=<%=workoutList[i].workout_id%>">DELETE</a>
-        <br>
-        <% } %>
+<%- include('partials/header', { pageTitle: 'workout history', pageClass: 'page-workouts' }) %>
+<%- include('partials/nav') %>
 
-    </form>
-</body>
+<section class="hero-panel">
+    <div class="hero-panel__grid">
+        <div>
+            <span class="eyebrow">history</span>
+            <h1 class="page-title">review your sessions</h1>
+            <p class="page-copy">
+                Every workout you save shows up here so you can update details and track your consistency over time.
+            </p>
+        </div>
+
+        <aside class="hero-panel__aside">
+            <div class="hero-stack">
+                <div>
+                    <span class="hero-kicker">logged sessions</span>
+                    <div class="hero-stat"><%= workoutList.length %></div>
+                </div>
+                <p class="hero-note">
+                    Use this list to quickly check recent workouts.
+                </p>
+            </div>
+        </aside>
+    </div>
+</section>
+
+<section class="content-grid mt-4">
+    <section class="content-panel">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <h2 class="panel-title">workout history</h2>
+                <p class="panel-copy">Edit or delete sessions.</p>
+            </div>
+
+            <a class="app-button" href="/workouts/new">add another workout</a>
+        </div>
+
+        <% if (workoutList.length === 0) { %>
+            <div class="empty-state">
+                <h3 class="panel-title mb-2">nothing logged yet</h3>
+                <p class="panel-copy">Add your first workout so the dashboard has progress to show.</p>
+            </div>
+        <% } else { %>
+            <div class="table-shell">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Workout</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Duration</th>
+                            <th scope="col">Notes</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for (let i = 0; i < workoutList.length; i++) { %>
+                            <tr>
+                                <td><strong><%= workoutList[i].workout_name %></strong></td>
+                                <td><%= workoutList[i].workout_date %></td>
+                                <td><%= workoutList[i].duration_minutes %> min</td>
+                                <td><%= workoutList[i].notes || 'No notes added.' %></td>
+                                <td>
+                                    <div class="button-row">
+                                        <a class="app-button-ghost" href="/workouts/edit?workout_id=<%= workoutList[i].workout_id %>">edit</a>
+                                        <a class="app-button-ghost" href="/workouts/delete?workout_id=<%= workoutList[i].workout_id %>">delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </section>
+</section>
+
+<%- include('partials/footer') %>

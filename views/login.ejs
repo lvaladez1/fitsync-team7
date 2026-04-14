@@ -1,27 +1,80 @@
-<%- include('partials/header') %>
+<%- include('partials/header', { pageTitle: 'login', pageClass: 'page-auth' }) %>
 <%- include('partials/nav') %>
 
-<h1>Login</h1>
+<section class="hero-panel">
+    <div class="hero-panel__grid">
+        <div>
+            <span class="eyebrow">workout tracker</span>
+            <h1 class="page-title">log in and keep your training rhythm steady</h1>
+            <p class="page-copy">
+                FitSync keeps your workouts, goals, and progress in one place
+            </p>
+        </div>
 
-<form action="/login" method="POST" id="loginForm">
-    <div>
-        <label for="login_email">Email</label>
-        <input type="email" id="login_email" name="email" required>
+        <aside class="hero-panel__aside">
+            <div class="hero-stack">
+                <div>
+                    <span class="hero-kicker">how it helps</span>
+                    <div class="hero-stat">1 place of focus</div>
+                </div>
+                <p class="hero-note">
+                    Track workout history, update sessions, and keep your routine organized without digging through notes.
+                </p>
+            </div>
+        </aside>
     </div>
+</section>
 
-    <br>
+<section class="auth-grid">
+    <article class="content-panel">
+        <h2 class="panel-title">welcome back</h2>
+        <p class="panel-copy">
+            Jump into your dashboard and pick up where you left off.
+        </p>
 
-    <div>
-        <label for="login_password">Password</label>
-        <input type="password" id="login_password" name="password" required>
-    </div>
+        <ul class="feature-list">
+            <li>
+                <strong>workout history</strong>
+                <span>See past sessions and update them.</span>
+            </li>
+            <li>
+                <strong>simple forms</strong>
+                <span>Keep entries fast with a flow for workouts and preferences.</span>
+            </li>
+            <li>
+                <strong>outdoor context</strong>
+                <span>Use the dashboard location card save your spot.</span>
+            </li>
+        </ul>
+    </article>
 
-    <br>
+    <section class="content-panel">
+        <h2 class="panel-title">log in</h2>
+        <p class="panel-copy">Use the account you already created to get back into your workout log.</p>
 
-    <button type="submit">Login</button>
-</form>
+        <form action="/login" method="POST" id="loginForm" class="app-form mt-4">
+            <div class="field-group">
+                <label for="login_email">Email</label>
+                <input type="email" id="login_email" name="email" required>
+            </div>
 
-<p>Need an account? <a href="/signup">Sign up here</a></p>
+            <div class="field-group">
+                <label for="login_password">Password</label>
+                <input type="password" id="login_password" name="password" required>
+            </div>
+
+            <div class="button-row">
+                <button class="app-button" type="submit">log in</button>
+                <a class="app-button-ghost" href="/signup">create account</a>
+            </div>
+        </form>
+
+        <div class="link-row">
+            <span>Need an account?</span>
+            <a href="/signup">sign up here</a>
+        </div>
+    </section>
+</section>
 
 <script src="/js/auth.js"></script>
 
