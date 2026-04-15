@@ -1,0 +1,77 @@
+<%- include('partials/header', { pageTitle: 'View Exercises', pageClass: 'page-workouts' }) %>
+<%- include('partials/nav') %>
+<h1>Exercises For</h1>
+<h1><%= workout.workout_name %></h1>
+<div class="table-shell">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Duration</th>
+                <th scope="col">Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><%= workout.workout_date %></td>
+                <td><%= workout.duration_minutes %> min</td>
+                <td><%= workout.notes || 'No notes added.' %></td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<section class="content-grid mt-4">
+    <section class="content-panel">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <h2 class="panel-title">Excerises</h2>
+                <p class="panel-copy">Edit or delete exercises.</p>
+            </div>
+
+            <a class="app-button" href="/workouts/<%= workout.workout_id %>/exercises/new">add another exercise</a>
+        </div>
+
+        <% if (exerciseList.length === 0) { %>
+            <div class="empty-state">
+                <h3 class="panel-title mb-2">nothing logged yet</h3>
+                <p class="panel-copy">Add your first exercise to your workout.</p>
+            </div>
+        <% } else { %>
+            <div class="table-shell">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Exercise</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Sets</th>
+                            <th scope="col">Reps</th>
+                            <th scope="col">Weight</th>
+                            <th scope="col">Distance</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% exerciseList.forEach(exercise => { %>
+                            <tr>
+                                <td><strong><%= exercise.exercise_name %></strong></td>
+                                <td><%= exercise.exercise_type %></td>
+                                <td><%= exercise.sets %> sets</td>
+                                <td><%= exercise.reps %> reps</td>
+                                <td><%= exercise.weight %> lbs</td>
+                                <td><%= exercise.distance %> m</td>
+                                <td>
+                                    <div class="button-row">
+                                        <a href="/exercises/edit?exercise_id=<%= exercise.exercise_id %>">Edit</a>
+                                        <a href="/exercises/delete?exercise_id=<%= exercise.exercise_id %>&workout_id=<%= workout.workout_id %>">Delete</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } %>
+    </section>
+</section>
+<%- include('partials/footer') %>
