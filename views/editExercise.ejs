@@ -1,0 +1,121 @@
+<%- include('partials/header', { pageTitle: 'new exercise', pageClass: 'page-workouts' }) %>
+<%- include('partials/nav') %>
+
+<h1>Edit Exercise in</h1>
+<h1>Workout <%= exerciseInfo.workout_name %></h1>
+    
+<div class="table-shell">
+    <table class="table align-middle">
+        <thead>
+            <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Duration</th>
+                <th scope="col">Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><%= exerciseInfo.workout_date %></td>
+                <td><%= exerciseInfo.duration_minutes %> min</td>
+                <td><%= exerciseInfo.notes || 'No notes added.' %></td>
+            </tr>
+        </tbody>
+     </table>
+</div>
+
+<% if (message) { %>
+    <p class="success-message"><%= message %></p>
+ <% } %>
+
+ <section class="content-grid mt-4">
+    <section class="content-panel">
+        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+            <div>
+                <h2 class="panel-title">Excerises</h2>
+                <p class="panel-copy">Edit or delete exercises.</p>
+            </div>
+
+            <a class="app-button" href="/workouts/<%= exerciseInfo.workout_id %>/exercises/new">add another exercise</a>
+        </div>
+        <form action="/exercises/edit" method="POST" class="exercise-form">
+        <input type="hidden" name="exercise_id" value="<%= exerciseInfo.exercise_id %>">
+        <input type="hidden" name="workout_id" value="<%= exerciseInfo.workout_id %>">
+
+        <div>
+            <label for="exercise_name">Exercise Name:</label>
+                <input
+                    type="text"
+                    id="exercise_name"
+                    name="exercise_name"
+                    value="<%= exerciseInfo.exercise_name %>"
+                    required
+                >
+        </div>
+
+        <div>
+            <label for="exercise_type">Exercise Type:</label>
+                <select id="exercise_type" name="exercise_type">
+                    <option value="">Select Type</option>
+                    <option value="Strength" <%= exerciseInfo.exercise_type === 'Strength' ? 'selected' : '' %>>Strength</option>
+                    <option value="Cardio" <%= exerciseInfo.exercise_type === 'Cardio' ? 'selected' : '' %>>Cardio</option>
+                    <option value="Flexibility" <%= exerciseInfo.exercise_type === 'Flexibility' ? 'selected' : '' %>>Flexibility</option>
+                    <option value="Sports" <%= exerciseInfo.exercise_type === 'Sports' ? 'selected' : '' %>>Sports</option>
+                </select>
+        </div>
+
+        <div>
+            <label for="sets">Sets:</label>
+                <input
+                    type="number"
+                    id="sets"
+                    name="sets"
+                    min="0"
+                    value="<%= exerciseInfo.sets ?? '' %>"
+                >
+        </div>
+
+        <div>
+            <label for="reps">Reps:</label>
+            <input
+                type="number"
+                id="reps"
+                name="reps"
+                min="0"
+                value="<%= exerciseInfo.reps ?? '' %>"
+            >
+        </div>
+
+        <div>
+            <label for="weight">Weight:</label>
+            <input
+                type="number"
+                id="weight"
+                name="weight"
+                min="0"
+                step="0.01"
+                value="<%= exerciseInfo.weight ?? '' %>"
+            >
+        </div>
+
+        <div>
+            <label for="distance">Distance:</label>
+            <input
+                type="number"
+                id="distance"
+                name="distance"
+                min="0"
+                step="0.01"
+                value="<%= exerciseInfo.distance ?? '' %>"
+            >
+        </div>
+
+        <div class="button-group">
+            <button type="submit">Update Exercise</button>
+            <a href="/workouts/<%= exerciseInfo.workout_id %>/exercises">Back to Exercise List</a>
+            <a href="/workouts/history">Back to Workout History</a>
+        </div>
+        </form>
+    </section>
+</section>
+
+<%- include('partials/footer.ejs') %>

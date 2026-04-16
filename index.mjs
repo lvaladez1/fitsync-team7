@@ -230,7 +230,9 @@ app.post('/workouts/new', isAuthenticated, async (req, res) => {
         ];
         const [rows] = await pool.query(sql, params);
 
-        res.render('newWorkout', { 'message': 'Workout added!' });
+        res.render('newWorkout', {
+            message: 'Workout added!',
+        });
     } catch (err) {
         console.log('ADD WORKOUT ERROR:', err);
         res.status(400).send('Error adding workout');
@@ -331,6 +333,263 @@ app.get('/workouts/delete', isAuthenticated, async (req, res) => {
                  WHERE user_id = ? AND workout_id = ?`;
     const [rows] = await pool.query(sql, [is_deleted, user_id, req.query.workout_id]);
     res.redirect('/workouts/history');
+});
+
+// --NEW EXERCISE PAGE
+app.get('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res) => {
+    try {
+        const user_id = req.session.user_id;
+        const workout_id = req.params.workout_id;
+
+        const sql = `
+            SELECT workout_id, workout_name, DATE_FORMAT(workout_date, '%Y-%m-%d') AS workout_date
+            FROM workouts
+            WHERE workout_id = ? AND user_id = ? AND is_deleted = 0
+        `;
+        const [rows] = await pool.query(sql, [workout_id, user_id]);
+
+        if (rows.length === 0) {
+            return res.status(404).send('Workout not found');
+        }
+
+        res.render('newExercise', {
+            workout: rows[0],
+            message: ''
+        });
+    } catch (err) {
+        console.log('NEW EXERCISE PAGE ERROR:', err);
+        res.status(500).send('Error loading exercise page');
+    }
+});
+
+
+// --ADD EXERCISE
+app.post('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res) => {
+    try {
+        const user_id = req.session.user_id;
+        const workout_id = req.params.workout_id;
+
+        const {
+            exercise_name,
+            sets,
+            reps,
+            weight,
+            distance,
+            exercise_type
+        } = req.body;
+
+        // make sure the workout belongs to the logged-in user
+        const workoutSql = `
+            SELECT workout_id, workout_name, DATE_FORMAT(workout_date, '%Y-%m-%d') AS workout_date
+            FROM workouts
+            WHERE workout_id = ? AND user_id = ? AND is_deleted = 0
+        `;
+        const [workoutRows] = await pool.query(workoutSql, [workout_id, user_id]);
+
+        if (workoutRows.length === 0) {
+            return res.status(404).send('Workout not found');
+        }
+
+        const insertSql = `
+            INSERT INTO exercises
+            (workout_id, exercise_name, sets, reps, weight, distance, exercise_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const params = [
+            workout_id,
+            exercise_name,
+            sets || null,
+            reps || null,
+            weight || null,
+            distance || null,
+            exercise_type || null
+        ];
+
+        await pool.query(insertSql, params);
+
+        res.render('newExercise', {
+            workout: workoutRows[0],
+            message: 'Exercise added successfully!'
+        });
+    } catch (err) {
+        console.log('ADD EXERCISE ERROR:', err);
+        res.status(500).send('Error adding exercise');
+    }
+});
+
+
+// --VIEW EXERCISES FOR A WORKOUT
+app.get('/workouts/:workout_id/exercises', isAuthenticated, async (req, res) => {
+    try {
+        const user_id = req.session.user_id;
+        const workout_id = req.params.workout_id;
+
+        const workoutSql = `
+            SELECT workout_id, workout_name, DATE_FORMAT(workout_date, '%Y-%m-%d') AS workout_date
+            FROM workouts
+            WHERE workout_id = ? AND user_id = ? AND is_deleted = 0
+        `;
+        const [workoutRows] = await pool.query(workoutSql, [workout_id, user_id]);
+
+        if (workoutRows.length === 0) {
+            return res.status(404).send('Workout not found');
+        }
+
+        const exerciseSql = `
+            SELECT *
+            FROM exercises
+            WHERE workout_id = ?
+            ORDER BY exercise_id DESC
+        `;
+        const [exerciseRows] = await pool.query(exerciseSql, [workout_id]);
+
+        res.render('exercisesList', {
+            workout: workoutRows[0],
+            exerciseList: exerciseRows
+        });
+    } catch (err) {
+        console.log('VIEW EXERCISES ERROR:', err);
+        res.status(500).send('Error retrieving exercises');
+    }
+});
+
+// --EDIT EXERCISE PAGE
+app.get('/exercises/edit', isAuthenticated, async (req, res) => {
+    try {
+        const user_id = req.session.user_id;
+        const exercise_id = req.query.exercise_id;
+
+        const sql = `
+            SELECT 
+                e.exercise_id,
+                e.workout_id,
+                e.exercise_name,
+                e.sets,
+                e.reps,
+                e.weight,
+                e.distance,
+                e.exercise_type,
+                w.workout_name,
+                DATE_FORMAT(w.workout_date, '%Y-%m-%d') AS workout_date
+            FROM exercises e
+            JOIN workouts w ON e.workout_id = w.workout_id
+            WHERE e.exercise_id = ?
+              AND w.user_id = ?
+              AND w.is_deleted = 0
+        `;
+        const [rows] = await pool.query(sql, [exercise_id, user_id]);
+
+        if (rows.length === 0) {
+            return res.status(404).send('Exercise not found');
+        }
+
+        res.render('editExercise', {
+            exerciseInfo: rows[0],
+            message: ''
+        });
+    } catch (err) {
+        console.log('EDIT EXERCISE PAGE ERROR:', err);
+        res.status(500).send('Error retrieving exercise');
+    }
+});
+
+
+// --UPDATE EXERCISE
+app.post('/exercises/edit', isAuthenticated, async (req, res) => {
+    try {
+        const user_id = req.session.user_id;
+
+        const {
+            exercise_id,
+            workout_id,
+            exercise_name,
+            sets,
+            reps,
+            weight,
+            distance,
+            exercise_type
+        } = req.body;
+
+        // Make sure the exercise belongs to a workout owned by the logged-in user
+        const checkSql = `
+            SELECT 
+                e.exercise_id,
+                e.workout_id,
+                w.workout_name,
+                DATE_FORMAT(w.workout_date, '%Y-%m-%d') AS workout_date
+            FROM exercises e
+            JOIN workouts w ON e.workout_id = w.workout_id
+            WHERE e.exercise_id = ?
+              AND e.workout_id = ?
+              AND w.user_id = ?
+              AND w.is_deleted = 0
+        `;
+        const [checkRows] = await pool.query(checkSql, [exercise_id, workout_id, user_id]);
+
+        if (checkRows.length === 0) {
+            return res.status(404).send('Exercise not found');
+        }
+
+        const updateSql = `
+            UPDATE exercises
+            SET exercise_name = ?,
+                sets = ?,
+                reps = ?,
+                weight = ?,
+                distance = ?,
+                exercise_type = ?
+            WHERE exercise_id = ? AND workout_id = ?
+        `;
+
+        const params = [
+            exercise_name,
+            sets || null,
+            reps || null,
+            weight || null,
+            distance || null,
+            exercise_type || null,
+            exercise_id,
+            workout_id
+        ];
+
+        await pool.query(updateSql, params);
+
+       res.redirect(`/workouts/${workout_id}/exercises`);
+    } catch (err) {
+        console.log('UPDATE EXERCISE ERROR:', err);
+        res.status(500).send('Error updating exercise');
+    }
+});
+
+// --DELETE EXERCISE
+app.get('/exercises/delete', isAuthenticated, async (req, res) => {
+    try {
+        const user_id = req.session.user_id;
+        const exercise_id = req.query.exercise_id;
+        const workout_id = req.query.workout_id;
+
+        // make sure the exercise belongs to a workout owned by the logged-in user
+        const checkSql = `
+            SELECT e.exercise_id
+            FROM exercises e
+            JOIN workouts w ON e.workout_id = w.workout_id
+            WHERE e.exercise_id = ? AND w.user_id = ? AND w.is_deleted = 0
+        `;
+        const [rows] = await pool.query(checkSql, [exercise_id, user_id]);
+
+        if (rows.length === 0) {
+            return res.status(404).send('Exercise not found');
+        }
+
+        const deleteSql = `DELETE FROM exercises WHERE exercise_id = ?`;
+        await pool.query(deleteSql, [exercise_id]);
+
+        res.redirect(`/workouts/${workout_id}/exercises`);
+    } catch (err) {
+        console.log('DELETE EXERCISE ERROR:', err);
+        res.status(500).send('Error deleting exercise');
+    }
 });
 
 // --DB TEST
