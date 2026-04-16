@@ -112,7 +112,7 @@
                     <dt>status</dt>
                     <dd id="locationStateLabel">idle</dd>
                 </div>
-                // update with actually lat long location resolution??
+                <!-- location data from Geolocation API -->
                 <div>
                     <dt>latitude...</dt>
                     <dd id="locationLatitude">--</dd>
@@ -132,22 +132,16 @@
     <section class="content-panel dashboard-span-two">
         <div class="section-heading">
             <div>
-                <h2 class="panel-title">panel title</h2>
-                <p class="panel-copy">panel copy here</p>
+                <h2 class="panel-title">weather snapshot</h2>
+                <p class="panel-copy">Current conditions update after you use your location above.</p>
             </div>
         </div>
 
         <div class="dashboard-callouts">
             <article class="dashboard-callout">
-                <span class="dashboard-callout__tag">panel tag</span>
-                <h3>panel header</h3>
-                <p>panel copy</p>
-            </article>
-
-            <article class="dashboard-callout">
-                <span class="dashboard-callout__tag">weather (??)</span>
-                <h3>weather header here (??)</h3>
-                <p>weather copy/ component here</p>
+                <span class="dashboard-callout__tag">Weather</span>
+                <h3>Current Weather</h3>
+                <p id="weatherInfo">Click "use my location" to load weather</p>
             </article>
         </div>
     </section>

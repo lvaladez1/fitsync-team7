@@ -78,6 +78,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const handleSuccess = (position) => {
         const { latitude, longitude } = position.coords;
 
+
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=imperial&appid=b7216d7b3812a61030e656db70cef97d`)
+            .then(res => res.json())
+            .then(data => {
+                const weatherCard = document.getElementById('weatherInfo');
+                if (!weatherCard) return;
+
+                if (data.cod && Number(data.cod) !== 200) {
+                    weatherCard.textContent = 'Weather data could not be loaded right now.';
+                    return;
+                }
+
+                const temp = data.main?.temp ?? '--';
+                const condition = data.weather?.[0]?.description ?? 'Unavailable';
+
+                weatherCard.innerHTML = `
+                    <strong>${Math.round(temp)}°F</strong><br>
+                    ${condition}
+                `;
+            })
+            .catch(err => {
+                console.log('Weather error:', err);
+                const weatherCard = document.getElementById('weatherInfo');
+                if (weatherCard) {
+                    weatherCard.textContent = 'Weather data could not be loaded right now.';
+                }
+            });
+
         setLocationState({
             state: 'success',
             statusLabel: 'ready',
