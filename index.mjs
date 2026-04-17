@@ -340,6 +340,7 @@ app.get('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res)
     try {
         const user_id = req.session.user_id;
         const workout_id = req.params.workout_id;
+        const exerciseName = req.query.name || '';
 
         const sql = `
             SELECT workout_id, workout_name, DATE_FORMAT(workout_date, '%Y-%m-%d') AS workout_date
@@ -353,6 +354,7 @@ app.get('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res)
         }
 
         res.render('newExercise', {
+            exerciseName,
             workout: rows[0],
             message: ''
         });
@@ -368,6 +370,7 @@ app.post('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res
     try {
         const user_id = req.session.user_id;
         const workout_id = req.params.workout_id;
+        const exerciseName = req.query.name || '';
 
         const {
             exercise_name,
@@ -378,7 +381,6 @@ app.post('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res
             exercise_type
         } = req.body;
 
-        // make sure the workout belongs to the logged-in user
         const workoutSql = `
             SELECT workout_id, workout_name, DATE_FORMAT(workout_date, '%Y-%m-%d') AS workout_date
             FROM workouts
@@ -409,6 +411,7 @@ app.post('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res
         await pool.query(insertSql, params);
 
         res.render('newExercise', {
+            exerciseName,
             workout: workoutRows[0],
             message: 'Exercise added successfully!'
         });
@@ -511,7 +514,6 @@ app.post('/exercises/edit', isAuthenticated, async (req, res) => {
             exercise_type
         } = req.body;
 
-        // Make sure the exercise belongs to a workout owned by the logged-in user
         const checkSql = `
             SELECT 
                 e.exercise_id,
@@ -569,7 +571,6 @@ app.get('/exercises/delete', isAuthenticated, async (req, res) => {
         const exercise_id = req.query.exercise_id;
         const workout_id = req.query.workout_id;
 
-        // make sure the exercise belongs to a workout owned by the logged-in user
         const checkSql = `
             SELECT e.exercise_id
             FROM exercises e
@@ -590,6 +591,26 @@ app.get('/exercises/delete', isAuthenticated, async (req, res) => {
         console.log('DELETE EXERCISE ERROR:', err);
         res.status(500).send('Error deleting exercise');
     }
+});
+
+app.get('/searchExercises', isAuthenticated, async(req,res) =>{
+    let url = 'https://edb-with-videos-and-images-by-ascendapi.p.rapidapi.com/api/v1/exercises'
+    let response = await fetch(url, {
+        headers: {
+        'X-RapidAPI-Key': process.env.EXERCISE_API,
+        'X-RapidAPI-Host': 'edb-with-videos-and-images-by-ascendapi.p.rapidapi.com'
+        }
+    });
+
+    let data = await response.json();
+    
+    let sql = 'SELECT workout_id, workout_name FROM workouts WHERE user_id = ?'
+    const [workouts] = await pool.query(sql, [req.session.user_id]);
+
+    res.render('searchExercise', {
+        exercises: data.data,
+        workouts: workouts
+    });
 });
 
 // --DB TEST

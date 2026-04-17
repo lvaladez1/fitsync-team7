@@ -37,7 +37,7 @@
             <form action="/workouts/<%= workout.workout_id %>/exercises/new" method="POST" class="exercise-form">
                 <div>
                     <label for="exercise_name">Exercise Name:</label>
-                    <input type="text" id="exercise_name" name="exercise_name" required>
+                    <input type="text" id="exercise_name" name="exercise_name" value="<%= exerciseName || '' %>" required>
                 </div>
 
                 <div>
