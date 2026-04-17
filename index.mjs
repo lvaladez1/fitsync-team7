@@ -341,6 +341,7 @@ app.get('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res)
         const user_id = req.session.user_id;
         const workout_id = req.params.workout_id;
         const exerciseName = req.query.name || '';
+        const exerciseType = req.query.type || '';
 
         const sql = `
             SELECT workout_id, workout_name, DATE_FORMAT(workout_date, '%Y-%m-%d') AS workout_date
@@ -355,6 +356,7 @@ app.get('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res)
 
         res.render('newExercise', {
             exerciseName,
+            exerciseType,
             workout: rows[0],
             message: ''
         });
@@ -371,6 +373,7 @@ app.post('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res
         const user_id = req.session.user_id;
         const workout_id = req.params.workout_id;
         const exerciseName = req.query.name || '';
+        const exerciseType = req.query.type || '';
 
         const {
             exercise_name,
@@ -412,6 +415,7 @@ app.post('/workouts/:workout_id/exercises/new', isAuthenticated, async (req, res
 
         res.render('newExercise', {
             exerciseName,
+            exerciseType, 
             workout: workoutRows[0],
             message: 'Exercise added successfully!'
         });
@@ -594,7 +598,16 @@ app.get('/exercises/delete', isAuthenticated, async (req, res) => {
 });
 
 app.get('/searchExercises', isAuthenticated, async(req,res) =>{
-    let url = 'https://edb-with-videos-and-images-by-ascendapi.p.rapidapi.com/api/v1/exercises'
+    const limit = 50;
+    const max = 100;
+    const query = req.query.exercise_query;
+
+    let url = `https://edb-with-videos-and-images-by-ascendapi.p.rapidapi.com/api/v1/exercises?limit=${limit}`
+    
+    if(query){
+        url += `&keywords=${query}`;
+    }
+    
     let response = await fetch(url, {
         headers: {
         'X-RapidAPI-Key': process.env.EXERCISE_API,
@@ -609,7 +622,8 @@ app.get('/searchExercises', isAuthenticated, async(req,res) =>{
 
     res.render('searchExercise', {
         exercises: data.data,
-        workouts: workouts
+        workouts: workouts,
+        exercise_query: query
     });
 });
 
