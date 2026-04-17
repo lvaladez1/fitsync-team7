@@ -638,6 +638,28 @@ a {
     text-decoration: underline;
 }
 
+.exercise-results{
+    display: flex;
+}
+
+.exercise-results img{
+    height: 200px;
+}
+
+.exercise-results button, .exercise-results select{
+    display: block;
+    margin-left: auto;
+}
+
+.exercise-results .exercise-info{
+    flex: 1;
+}
+
+.hidden-form {
+    display: none;
+    margin-top: 10px;
+}
+
 .location-panel {
     background:
         linear-gradient(160deg, rgba(216, 238, 228, 0.55) 0%, rgba(255, 255, 255, 0.92) 58%),

@@ -1,0 +1,89 @@
+<%- include('partials/header', { pageTitle: 'add workout', pageClass: 'page-workouts' }) %>
+<%- include('partials/nav') %>
+
+<section class="hero-panel">
+    <div class="hero-panel__grid">
+        <div>
+            <span class="eyebrow">Search Exercises</span>
+            <h1 class="page-title">Search Exercises</h1>
+            <p class="page-copy">
+                Search through our list of ready to go exercises
+            </p>
+        </div>
+
+        <aside class="hero-panel__aside">
+            <div class="hero-stack">
+                <div>
+                    <span class="hero-kicker">quick tip</span>
+                    <div class="hero-stat">30 sec</div>
+                </div>
+                <p class="hero-note">
+                    Short notes now make your history more useful later when you want to spot patterns in your training.
+                </p>
+            </div>
+        </aside>
+    </div>
+</section>
+<section class="content-grid mt-4">
+        <section class="content-panel"> 
+            <section class="exercise-results">
+                <div>     
+                    <img src="https://camo.githubusercontent.com/8819c3409c51c427740b06f567fc7c6fcaecc40327d229d28cfe466744586b38/68747470733a2f2f756361726563646e2e636f6d2f36323537313435342d666666372d343334342d386432332d3832303335306437343963382f63686573745f666c795f696d6167652e706e67" alt="Exercise Image">
+                </div>
+                <div class="exercise-info">
+                    <h1><span>Add Your Own Exercise</span></h1>
+                    Name: <span>you set the name</span><br>
+                    Type: <span>you set the type</span><br>
+                    <button type="button" class="app-button add-exercise" data-exercise-id="diy-exercise">Add to Workout</button>
+                <div id="form-diy-exercise" class="hidden-form">
+                    <input type="hidden" class="exercise-name" value="">
+                    <label>Choose workout:</label>
+                    <select class="workout-select">
+                        <option value="">Select a workout</option>
+                        <% for (let workout of workouts) { %>
+                            <option value="<%= workout.workout_id %>">
+                                <%= workout.workout_name %>
+                            </option>
+                        <% } %>
+                    </select>
+
+                <button type="button" class="app-button add-to-workout" data-exercise-id="diy-exercise">Add</button>
+                </div>
+            </section>
+        </section>
+    </section>
+<% exercises.forEach((exercise, index) => { %>
+    <section class="content-grid mt-4">
+        <section class="content-panel"> 
+            <section class="exercise-results">
+                <div>     
+                    <img src="<%=   exercise.imageUrl  %>" alt="Exercise Image">
+                </div>
+                <div class="exercise-info">
+                    <h1><span><%= exercise.name %></span></h1>
+                    Type: <span><%= exercise.name %></span><br>
+                    Target Muscles: <span><%= exercise.name %></span><br>
+                    Equipment: <span><%= exercise.name %></span><br>
+                    <button type="button" class="app-button add-exercise" data-exercise-id="<%= index %>">Add to Workout</button>
+                <div id="form-<%= index %>" class="hidden-form">
+                <input type="hidden" class="exercise-name" value="<%= exercise.name %>">
+                    <label>Choose workout:</label>
+                    <select class="workout-select">
+                        <option value="">Select a workout</option>
+                        <% for (let workout of workouts) { %>
+                            <option value="<%= workout.workout_id %>">
+                                <%= workout.workout_name %>
+                            </option>
+                        <% } %>
+                    </select>
+
+                <button type="button" class="app-button add-to-workout" data-exercise-id="<%= index %>">Add</button>
+                </div>
+            </section>
+        </section>
+    </section>
+<% }) %>
+<script src="/js/addExercise.js"></script>
+
+<%- include('partials/footer') %>
+
