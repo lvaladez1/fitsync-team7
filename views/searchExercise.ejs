@@ -9,6 +9,10 @@
             <p class="page-copy">
                 Search through our list of ready to go exercises
             </p>
+            <form method="GET" action="/searchExercises" class="search-form">
+                <input type="text" name="exercise_query" placeholder="Search exercises (e.g. chest, biceps, squat)" value="<%= typeof exercise_query !== 'undefined' ? exercise_query : '' %>">
+                <button type="submit" class="app-button">Search</button>
+            </form>
         </div>
 
         <aside class="hero-panel__aside">
@@ -37,7 +41,6 @@
                     <button type="button" class="app-button add-exercise" data-exercise-id="diy-exercise">Add to Workout</button>
                 <div id="form-diy-exercise" class="hidden-form">
                     <input type="hidden" class="exercise-name" value="">
-                    <label>Choose workout:</label>
                     <select class="workout-select">
                         <option value="">Select a workout</option>
                         <% for (let workout of workouts) { %>
@@ -67,7 +70,7 @@
                     <button type="button" class="app-button add-exercise" data-exercise-id="<%= index %>">Add to Workout</button>
                 <div id="form-<%= index %>" class="hidden-form">
                 <input type="hidden" class="exercise-name" value="<%= exercise.name %>">
-                    <label>Choose workout:</label>
+                <input type="hidden" class="exercise-type" value="<%= exercise.exerciseType %>">
                     <select class="workout-select">
                         <option value="">Select a workout</option>
                         <% for (let workout of workouts) { %>

@@ -15,6 +15,7 @@ document.querySelectorAll(".add-to-workout").forEach(button => {
         const container = document.getElementById(`form-${exerciseId}`);
         const workoutSelect = container.querySelector(".workout-select");
         const exerciseName = container.querySelector(".exercise-name").value;
+        const exerciseType = container.querySelector(".exercise-type").value;
 
         const workoutId = workoutSelect.value;
 
@@ -23,6 +24,6 @@ document.querySelectorAll(".add-to-workout").forEach(button => {
             return;
         }
 
-        window.location.href = `/workouts/${workoutId}/exercises/new?name=${encodeURIComponent(exerciseName)}`;
+        window.location.href = `/workouts/${workoutId}/exercises/new?name=${encodeURIComponent(exerciseName)}&type=${encodeURIComponent(exerciseType)}`;
     });
 });
