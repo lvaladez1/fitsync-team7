@@ -61,9 +61,9 @@
                 </div>
                 <div class="exercise-info">
                     <h1><span><%= exercise.name %></span></h1>
-                    Type: <span><%= exercise.name %></span><br>
-                    Target Muscles: <span><%= exercise.name %></span><br>
-                    Equipment: <span><%= exercise.name %></span><br>
+                    Type: <span><%= exercise.exerciseType %></span><br>
+                    Target Muscles: <span><%= exercise.targetMuscles %></span><br>
+                    Equipment: <span><%= exercise.equipments %></span><br>
                     <button type="button" class="app-button add-exercise" data-exercise-id="<%= index %>">Add to Workout</button>
                 <div id="form-<%= index %>" class="hidden-form">
                 <input type="hidden" class="exercise-name" value="<%= exercise.name %>">
