@@ -433,7 +433,7 @@ app.get('/workouts/:workout_id/exercises', isAuthenticated, async (req, res) => 
         const workout_id = req.params.workout_id;
 
         const workoutSql = `
-            SELECT workout_id, workout_name, DATE_FORMAT(workout_date, '%Y-%m-%d') AS workout_date
+            SELECT workout_id, workout_name, duration_minutes, DATE_FORMAT(workout_date, '%Y-%m-%d') AS workout_date
             FROM workouts
             WHERE workout_id = ? AND user_id = ? AND is_deleted = 0
         `;
