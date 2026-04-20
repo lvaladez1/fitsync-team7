@@ -35,7 +35,7 @@
                 <p class="panel-copy">Edit or delete exercises.</p>
             </div>
 
-            <a class="app-button" href="/workouts/<%= exerciseInfo.workout_id %>/exercises/new">add another exercise</a>
+            <a class="app-button" href="/exercises/search">add another exercise</a>
         </div>
         <form action="/exercises/edit" method="POST" class="exercise-form">
         <input type="hidden" name="exercise_id" value="<%= exerciseInfo.exercise_id %>">

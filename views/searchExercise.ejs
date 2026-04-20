@@ -9,7 +9,7 @@
             <p class="page-copy">
                 Search through our list of ready to go exercises
             </p>
-            <form method="GET" action="/searchExercises" class="search-form">
+            <form method="GET" action="/exercises/search" class="search-form">
                 <input type="text" name="exercise_query" placeholder="Search exercises (e.g. chest, biceps, squat)" value="<%= typeof exercise_query !== 'undefined' ? exercise_query : '' %>">
                 <button type="submit" class="app-button">Search</button>
             </form>

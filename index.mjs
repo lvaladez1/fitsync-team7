@@ -597,7 +597,7 @@ app.get('/exercises/delete', isAuthenticated, async (req, res) => {
     }
 });
 
-app.get('/searchExercises', isAuthenticated, async(req,res) =>{
+app.get('/exercises/search', isAuthenticated, async(req,res) =>{
     const limit = 50;
     const max = 100;
     const query = req.query.exercise_query;
